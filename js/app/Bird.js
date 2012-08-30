@@ -6,11 +6,11 @@
 		this.height = 30;
 
         // affects how fast the bird falls
-        this.weight = 0.03;
+        this.weight = 2;
         // affects how much the bird rises when he flaps his tiny wings
-        this.lift = 0.3;
+        this.lift = 0.1;
         // affects his left/right movement speed
-        this.speed = 5;
+        this.speed = 3;
         // how much nectar birdy eats!
         this.hunger = 2;
 
@@ -27,6 +27,8 @@
         this.flower = null;
         this.flowerSippingTimer = null;
         this.flowerTargetTimer = null;
+        this.drainRate = 2;
+        this.lastWeightDisplayed = 0;
 	};
 
 	Bird.prototype.setPos = function(pos)
@@ -47,7 +49,7 @@
             this.yAccel += this.weight;
         }*/
 
-        this.yAccel += this.weight;
+        this.yAccel += ( this.weight / 100 );
 
         var newX = this.x + this.xAccel,
             newY = this.y + this.yAccel;
@@ -88,9 +90,16 @@
         if ( currentFlower === null ) {
             // unset our flower reference
             this.flower = null;
+
             // clear all the timeouts for throttling sip rate
             clearTimeout(this.flowerTargetTimer);
             clearTimeout(this.flowerSippingTimer);
+        }
+
+        // update the bird's weight in the UI
+        if ( this.lastWeightDisplayed + 0.1 < this.weight ) {
+            this.lastWeightDisplayed = this.weight;
+            root.UI.displayWeight(this.weight);
         }
     };
 
@@ -138,7 +147,8 @@
         var _this = this;
 
         // drain the flower
-        this.flower.drain(2);
+        this.flower.drain(this.drainRate);
+        this.weight += ( this.drainRate / 1000 );
 
         this.flowerSippingTimer = setTimeout(function() { _this._sipFlower(); }, 50);
     };

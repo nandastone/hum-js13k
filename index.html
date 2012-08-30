@@ -12,18 +12,23 @@
     <style>* { padding: 0; margin: 0; }</style>
 </head>
 
-<body onkeydown="Game.keyDown(event);" onkeyup="Game.keyUp(event);">
+<body onkeydown="//Game.keyDown(event);" onkeyup="//Game.keyUp(event);">
 
 <div id="wrapper">
     <canvas id="stage" width="640" height="480"></canvas>
+    <p>Roger the hummingbird is <span id="weight"></span> pounds!</p>
 </div>
 
 <!-- vendor -->
 <script src="/js/vendor/requestAnimationFrame.polyfill.js"></script>
 
+<!-- libs -->
+<script src="/js/lib/Utils.js"></script>
+
 <!-- app -->
 <script src="/js/app/Game.js"></script>
 <script src="/js/app/Draw.js"></script>
+<script src="/js/app/UI.js"></script>
 <script src="/js/app/Bird.js"></script>
 <script src="/js/app/Flower.js"></script>
 

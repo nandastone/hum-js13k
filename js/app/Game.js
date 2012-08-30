@@ -1,141 +1,242 @@
 (function(root) {
 
-	var Game = (function()
-	{
-		var _canvas,
-			canvas,
-			_toUpdate = [],
-			_toDraw = [];
+    var Game = (function()
+    {
+        var _canvas,
+            canvas,
+            _toUpdate = [],
+            _toDraw = [];
 
-		// game logic
-		var max_flowers = 5;
+        // game logic
+        var _maxFlowers = 5,
+            _createNewFlowerTimer = null;
 
-		var _useCanvas = function(id)
-		{
-			_canvas = document.getElementById(id);
-			
-			canvas = {
-				context : _canvas.getContext('2d'),
-				width : _canvas.width,
-				height : _canvas.height
-			};
+        // game objects
+        var _bird = 'lol';
 
-			console.log('Canvas setup:', canvas);
-		};
+        var _useCanvas = function(id)
+        {
+            _canvas = document.getElementById(id);
+            
+            canvas = {
+                context : _canvas.getContext('2d'),
+                width : _canvas.width,
+                height : _canvas.height
+            };
 
-		var _renderLoop = function()
-		{
-			// request a new frame
-			requestAnimFrame(_renderLoop);
+            console.log('Canvas setup:', canvas);
+        };
 
-			// render everything
-			_updateAll();
-			_drawAll();
-		};
+        var _renderLoop = function()
+        {
+            // request a new frame
+            requestAnimFrame(_renderLoop);
 
-		var _updateAll = function()
-		{
-			for (var i = 0, l = _toUpdate.length; i < l; i++) {
-				_toUpdate[i].update();
-			}
-		};
+            _logic();
 
-		var _drawAll = function()
-		{
-			// clear screen
-			root.Draw.clear();
+            // render everything
+            _updateAll();
+            _drawAll();
+        };
 
-			// draw background
-			root.Draw.drawRectangle('#00ffcc', 0, 0, canvas.width, canvas.height);
+        var _logic = function()
+        {
+            // create a new flower if we need more
+            // TODO: have a delay before creating a new flower
+            if ( root.Flower.flowers.length < _maxFlowers ) {
+                var newFlower = new root.Flower();
+                _toUpdate.push(newFlower);
+                _toDraw.push(newFlower);
 
-			for (var i = 0, l = _toDraw.length; i < l; i++) {
-				_toDraw[i].draw();
-			}
-		};
+                console.log('Creating new flower', newFlower);
+            }
+        };
 
-		var _placeFlowers = function()
-		{
-			asdf
-		};
+        var _updateAll = function()
+        {
+            for (var i = 0, l = _toUpdate.length; i < l; i++) {
+                var updateItem = _toUpdate[i];
+                
+                if ( updateItem === null|| typeof updateItem === 'undefined' ) continue;
 
-		var _bindEvents = function()
-		{
+                updateItem.update();
+            }
+        };
 
-		};
+        var _drawAll = function()
+        {
+            // clear screen
+            root.Draw.clear();
 
-		var keyUp = function(e)
-		{
-			var charCode = (e.charCode) ? e.charCode : e.keyCode;
+            // draw background
+            root.Draw.drawRectangle('#00ffcc', 0, 0, canvas.width, canvas.height);
 
-			//console.log('key up', e, charCode);
+            for (var i = 0, l = _toDraw.length; i < l; i++) {
+                var drawItem = _toDraw[i];
 
-			// SPACE = flap birdy!
-			if (charCode === 32) {
-				this.bird.flap();
-			}
-		};
+                if ( drawItem === null || typeof drawItem === 'undefined' ) continue;
 
-		var keyDown = function(e)
-		{
-			var charCode = (e.charCode) ? e.charCode : e.keyCode;
+                drawItem.draw();
+            }
+        };
 
-			//console.log('key down', e, charCode);
+        var _bindEvents = function()
+        {
+            var _this = this;
 
-			// LEFT = move birdy!
-			if (charCode === 37) {
-				this.bird.left();
-			}
+            KeyboardController({
+                // space bar
+                32: function() { _bird.flap(); },
+                // left arrow key
+                37: function() { _bird.left(); },
+                // right arrow key
+                39: function() { _bird.right(); }
+            }, 50);
+        };
 
-			// RIGHT = move birdy!
-			if (charCode === 39) {
-				this.bird.right();
-			}
-		};
+        var removeFromUpdate = function(obj)
+        {
+            if ( !root.Utils.removeFromArray( _toUpdate, obj ) ) {
+                throw new Error('Failed to remove an object from the _toUpdate array.');
+            }
+        };
 
-		var init = function() {
-			console.log('Starting the game!');
+        var removeFromDraw = function(obj)
+        {
+            if ( !root.Utils.removeFromArray( _toDraw, obj ) ) {
+                throw new Error('Failed to remove an object from the _toDraw array.');
+            }
+        };
 
-			console.log('Setting up the canvas!');
-			_useCanvas('stage');
+        var getCanvasDimensions = function()
+        {
+            return { width: canvas.width, height: canvas.height };
+        };
 
-			console.log('Setting up the drawer!');
-			root.Draw.setCanvas(canvas);
+        var keyUp = function(e)
+        {
+            var charCode = (e.charCode) ? e.charCode : e.keyCode;
 
-			console.log('Binding events!');
-			_bindEvents();
+            //console.log('key up', e, charCode);
 
-			console.log('Creating the bird!');
-			this.bird = new root.Bird();
-			_toUpdate.push(this.bird);
-			_toDraw.push(this.bird);
+            // SPACE = flap birdy!
+            if (charCode === 32) {
+                this.bird.flap();
+            }
+        };
 
-			this.bird.setPos({ x: 300, y: 0 });
+        var keyDown = function(e)
+        {
+            var charCode = (e.charCode) ? e.charCode : e.keyCode;
 
-			console.log('Creating some flowers!');
-			_placeFlowers();
-			/*var flower1 = new root.Flower();
-			flower1.setPos({ x: 100, y: 100 });
-			_toDraw.push(flower1);
+            //console.log('key down', e, charCode);
 
-			var flower2 = new root.Flower();
-			flower2.setPos({ x: 200, y: 200 });
-			_toDraw.push(flower2);
+            // LEFT = move birdy!
+            if (charCode === 37) {
+                this.bird.left();
+            }
 
-			var flower3 = new root.Flower();
-			flower3.setPos({ x: 300, y: 300 });
-			_toDraw.push(flower3);*/
+            // RIGHT = move birdy!
+            if (charCode === 39) {
+                this.bird.right();
+            }
+        };
 
-			console.log('Starting render loop!');
-			_renderLoop();
-		};
+        var init = function() {
+            console.log('Starting the game!');
 
-		return {
-			init: init,
-			keyDown: keyDown,
-			keyUp: keyUp
-		};
-	})();
+            console.log('Setting up the canvas!');
+            _useCanvas('stage');
 
-	root.Game = Game;
+            console.log('Setting up the drawer!');
+            root.Draw.setCanvas(canvas);
+
+            console.log('Binding events!');
+            _bindEvents();
+
+            console.log('Creating some flowers!');
+
+            console.log('Creating the bird!');
+            _bird = new root.Bird();
+            _toUpdate.push(_bird);
+            _toDraw.push(_bird);
+
+            console.log('birdy bird', _bird);
+
+            _bird.setPos({ x: 300, y: 0 });
+
+            console.log('Starting render loop!');
+            _renderLoop();
+        };
+
+        return {
+            init: init,
+            keyDown: keyDown,
+            keyUp: keyUp,
+            getCanvasDimensions: getCanvasDimensions,
+            removeFromDraw: removeFromDraw,
+            removeFromUpdate: removeFromUpdate,
+
+            testUpdateList: _toUpdate,
+            testDrawList: _toDraw
+        };
+    })();
+
+    root.Game = Game;
 
 })(window);
+
+// Keyboard input with customisable repeat (set to 0 for no key repeat)
+//
+function KeyboardController(keys, repeat)
+{
+    // Lookup of key codes to timer ID, or null for no repeat
+    //
+    var timers = {};
+
+    // When key is pressed and we don't already think it's pressed, call the
+    // key action callback and set a timer to generate another one after a delay
+    //
+    document.onkeydown = function(event)
+    {
+        var key = (event || window.event).keyCode;
+        
+        if (!(key in keys))
+            return true;
+
+        if (!(key in timers)) {
+            timers[key]= null;
+            keys[key]();
+            if (repeat !== 0)
+                timers[key] = setInterval(keys[key], repeat);
+        }
+        return false;
+    };
+
+    // Cancel timeout and mark key as released on keyup
+    //
+    document.onkeyup = function(event)
+    {
+        var key = (event || window.event).keyCode;
+        
+        if (key in timers) {
+            if (timers[key] !== null)
+                clearInterval(timers[key]);
+            delete timers[key];
+        }
+    };
+
+    // When window is unfocused we may not get key events. To prevent this
+    // causing a key to 'get stuck down', cancel all held keys
+    //
+    window.onblur = function()
+    {
+        for (key in timers) {
+            if (timers[key] !== null) {
+                clearInterval(timers[key]);
+            }
+        }
+        
+        timers = {};
+    };
+}
