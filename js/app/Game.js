@@ -55,7 +55,10 @@
 
 		var _placeFlowers = function()
 		{
-			asdf
+			var flower1 = new root.Flower();
+			flower1.setPos({ x: 100, y: 100 });
+			_toDraw.push(flower1);
+
 		};
 
 		var _bindEvents = function()
