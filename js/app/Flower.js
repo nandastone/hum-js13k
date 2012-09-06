@@ -1,8 +1,8 @@
 (function(root) {
 
-	var Flower = function(options)
-	{
-		// engine logic
+    var Flower = function(options)
+    {
+        // engine logic
         //
         //this.zIndex = 5;
 
@@ -23,8 +23,8 @@
         this.stalkThickness = this.width / 6;
         this.stalkOpacity = 1;
 
-		this.x = 0;
-		this.y = 0;
+        this.x = 0;
+        this.y = 0;
         this.targetY = 0;
         this.targetX = 0;
         this.positionBuffer = 70; // distance to keep away from edges of stage
@@ -54,10 +54,10 @@
         root.Flower.flowers.push(this);
 
         this.grow();
-	};
+    };
 
-	Flower.prototype.update = function()
-	{
+    Flower.prototype.update = function()
+    {
         // animate up into the light!
         if ( this.growing ) {
             if ( this.y > this.targetY ) {
@@ -81,10 +81,10 @@
 
         // flowers slowly die over time
         this.drain(this.decayRate);
-	};
+    };
 
-	Flower.prototype.draw = function()
-	{
+    Flower.prototype.draw = function()
+    {
         var originalLightness = this.hsl.lightness;
 
         // stalk
@@ -133,7 +133,7 @@
 
         // -- DRAW TIME!
         // flower core
-		root.Draw.drawRectangle(this.colour, 0, 0, this.width, this.height);
+        root.Draw.drawRectangle(this.colour, 0, 0, this.width, this.height);
 
         // petals
         this.hsl.lightness -= 10;
@@ -148,7 +148,7 @@
         this._updateColour();
 
         root.Draw.restore();
-	};
+    };
 
     Flower.prototype._randomPosition = function()
     {
@@ -208,7 +208,7 @@
         return true;
     };
 
-	// game logic
+    // game logic
     Flower.prototype.grow = function()
     {
         var targetPos = this._randomPosition();
@@ -239,6 +239,6 @@
 
     Flower.flowers = [];
 
-	root.Flower = Flower;
+    root.Flower = Flower;
 
 })(window);

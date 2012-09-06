@@ -1,15 +1,15 @@
 (function(root) {
 
-	var Bird = function()
-	{
+    var Bird = function()
+    {
         // engine logic
         //
         this.zIndex = 100;
 
         // flower logic
         //
-		this.width = this.originalWidth = 30;
-		this.height = this.originalHeight = 30;
+        this.width = this.originalWidth = 30;
+        this.height = this.originalHeight = 30;
         this.sprite = document.getElementById('hum');
         this.frames = 3;
         this.curFrame = 0;
@@ -25,10 +25,10 @@
         // how much energy birdy has to flap
         this.energy = 100;
 
-		this.x = 0;
-		this.y = 0;
-		this.xAccel = 0;
-		this.yAccel = 0.02;
+        this.x = 0;
+        this.y = 0;
+        this.xAccel = 0;
+        this.yAccel = 0.02;
         // the bird has a limit to it's upward movement
         this.maxYUpAccel = 2.5;
         // currently no limit to downward movement
@@ -41,23 +41,23 @@
         this.drainRate = 2;
         this.lastWeightDisplayed = 0;
         this.canvas = root.Game.getCanvasDimensions();
-	};
+    };
 
-	Bird.prototype.setPos = function(pos)
-	{
-		this.x = pos.x;
-		this.y = pos.y;
-	};
+    Bird.prototype.setPos = function(pos)
+    {
+        this.x = pos.x;
+        this.y = pos.y;
+    };
 
     Bird.prototype.getPos = function()
     {
         return pos;
     };
 
-	Bird.prototype.update = function()
-	{
+    Bird.prototype.update = function()
+    {
         // clamp the downwards acceleration
-		/*if ( Math.abs(this.yAccel + this.weight) < this.maxYUpAccel ) {
+        /*if ( Math.abs(this.yAccel + this.weight) < this.maxYUpAccel ) {
             this.yAccel += this.weight;
         }*/
 
@@ -66,11 +66,11 @@
         var newX = this.x + this.xAccel,
             newY = this.y + this.yAccel;
 
-		// bounds checking - vertical top
-		if ( ( newY + this.height ) < 0 ) {
-			newY = this.y;
+        // bounds checking - vertical top
+        if ( ( newY + this.height ) < 0 ) {
+            newY = this.y;
             this.yAccel = 0;
-		}
+        }
 
         // bounds checking - vertical bottom
         if ( ( newY - this.height ) > this.canvas.height ) {
@@ -91,10 +91,10 @@
         this.y = newY;
 
         this._logic();
-	};
+    };
 
-	Bird.prototype.draw = function()
-	{
+    Bird.prototype.draw = function()
+    {
         root.Draw.drawImage(this.sprite, this.originalWidth * this.curFrame, 0, this.originalWidth, this.originalHeight, this.x, this.y, this.width, this.height);
 
         this.curFrame++;
@@ -115,7 +115,7 @@
 
             root.Draw.restore();
         }
-	};
+    };
 
     Bird.prototype._logic = function()
     {
@@ -150,9 +150,9 @@
         }
     };
 
-	// game logic
-	Bird.prototype.flap = function()
-	{
+    // game logic
+    Bird.prototype.flap = function()
+    {
         // don't flap when too high
         if ( this.y < 0 ) return;
 
@@ -171,9 +171,9 @@
         if ( newYAccel < -this.maxYUpAccel) {
             return;
         }
-		
+        
         this.yAccel = newYAccel;
-	};
+    };
 
     Bird.prototype.left = function()
     {
@@ -227,6 +227,6 @@
         root.UI.displayEnergy(this.energy);
     };
 
-	root.Bird = Bird;
+    root.Bird = Bird;
 
 })(window);
