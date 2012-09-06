@@ -5,14 +5,20 @@
         var _canvas,
             canvas,
             _toUpdate = [],
-            _toDraw = [];
+            _toDraw = [],
+            _ended = false;
 
         // game logic
-        var _maxFlowers = 5,
+        var _maxFlowers = 15,
             _createNewFlowerTimer = null;
 
         // game objects
-        var _bird = 'lol';
+        var _bird = null;
+
+        // background visuals
+        var _backgroundGradient = null;
+        var _groundHeight = 35;
+        var _sunGradient = null;
 
         var _useCanvas = function(id)
         {
@@ -24,11 +30,22 @@
                 height : _canvas.height
             };
 
+            _backgroundGradient = canvas.context.createLinearGradient(canvas.width / 3, 0, canvas.width / 2, canvas.height);
+            _backgroundGradient.addColorStop(0, '#e99825');
+            _backgroundGradient.addColorStop(1, '#e92553');
+
+            _sunGradient = canvas.context.createRadialGradient(115, 100, 0, 105, 90, 100);
+            _sunGradient.addColorStop(0, 'rgba(240,217,19,1)');
+            _sunGradient.addColorStop(0.95, 'rgba(240,196,19,.9)');
+            _sunGradient.addColorStop(1, 'rgba(240,196,19,0)');
+
             console.log('Canvas setup:', canvas);
         };
 
         var _renderLoop = function()
         {
+            if ( _ended ) return;
+
             // request a new frame
             requestAnimFrame(_renderLoop);
 
@@ -41,15 +58,30 @@
 
         var _logic = function()
         {
-            // create a new flower if we need more
-            // TODO: have a delay before creating a new flower
-            if ( root.Flower.flowers.length < _maxFlowers ) {
-                var newFlower = new root.Flower();
-                _toUpdate.push(newFlower);
-                _toDraw.push(newFlower);
+            // keyboard events
+            if (Key.isDown(Key.LEFT)) _bird.left();
+            if (Key.isDown(Key.RIGHT)) _bird.right();
+            if (Key.isPreserved(Key.SPACE)) _bird.flap();
 
-                console.log('Creating new flower', newFlower);
+            if ( _createNewFlowerTimer === null ) {
+                _createNewFlowerTimer = setTimeout(function() {
+                    clearTimeout(_createNewFlowerTimer);
+                    _createNewFlowerTimer = null;
+
+                    // only a create a flower one in three times
+                    if ( root.Utils.getRandomInt(1, 3) !== 1 ) return;
+
+                    if ( root.Flower.flowers.length < _maxFlowers ) {
+                        var newFlower = new root.Flower();
+
+                        addToUpdate(newFlower);
+                        addToDraw(newFlower);
+
+                        console.log('Creating new flower', newFlower);
+                    }
+                }, root.Utils.getRandomInt(200, 1000));
             }
+
         };
 
         var _updateAll = function()
@@ -69,8 +101,21 @@
             root.Draw.clear();
 
             // draw background
-            root.Draw.drawRectangle('#00ffcc', 0, 0, canvas.width, canvas.height);
+            root.Draw.save();
+            canvas.context.fillStyle = _backgroundGradient;
+            canvas.context.fillRect(0, 0, canvas.width, canvas.height);
+            root.Draw.restore();
 
+            // draw the ground
+            root.Draw.drawRectangle('#999b0f', 0, canvas.height - _groundHeight, canvas.width, _groundHeight);
+
+            // draw the sun
+            root.Draw.save();
+            canvas.context.fillStyle = _sunGradient;
+            canvas.context.fillRect(5, -10, 200, 200);
+            root.Draw.restore();
+
+            // draw everything else
             for (var i = 0, l = _toDraw.length; i < l; i++) {
                 var drawItem = _toDraw[i];
 
@@ -82,16 +127,15 @@
 
         var _bindEvents = function()
         {
-            var _this = this;
+            // keyboard events for game control
+            window.addEventListener('keyup', function(event) { Key.onKeyup(event); }, false);
+            window.addEventListener('keydown', function(event) { Key.onKeydown(event); }, false);
+        };
 
-            KeyboardController({
-                // space bar
-                32: function() { _bird.flap(); },
-                // left arrow key
-                37: function() { _bird.left(); },
-                // right arrow key
-                39: function() { _bird.right(); }
-            }, 50);
+        var addToUpdate = function(obj)
+        {
+            _toUpdate.push(obj);
+            // no need to sort by z-index, don't really care who's updated first
         };
 
         var removeFromUpdate = function(obj)
@@ -99,6 +143,13 @@
             if ( !root.Utils.removeFromArray( _toUpdate, obj ) ) {
                 throw new Error('Failed to remove an object from the _toUpdate array.');
             }
+        };
+
+        var addToDraw = function(obj)
+        {
+            _toDraw.push(obj);
+            // sort the draw array by the zIndex to allow for proper layering
+            _toDraw.sort(root.Utils.sortByZIndex);
         };
 
         var removeFromDraw = function(obj)
@@ -113,35 +164,6 @@
             return { width: canvas.width, height: canvas.height };
         };
 
-        var keyUp = function(e)
-        {
-            var charCode = (e.charCode) ? e.charCode : e.keyCode;
-
-            //console.log('key up', e, charCode);
-
-            // SPACE = flap birdy!
-            if (charCode === 32) {
-                this.bird.flap();
-            }
-        };
-
-        var keyDown = function(e)
-        {
-            var charCode = (e.charCode) ? e.charCode : e.keyCode;
-
-            //console.log('key down', e, charCode);
-
-            // LEFT = move birdy!
-            if (charCode === 37) {
-                this.bird.left();
-            }
-
-            // RIGHT = move birdy!
-            if (charCode === 39) {
-                this.bird.right();
-            }
-        };
-
         var init = function() {
             console.log('Starting the game!');
 
@@ -154,25 +176,33 @@
             console.log('Binding events!');
             _bindEvents();
 
-            console.log('Creating some flowers!');
-
             console.log('Creating the bird!');
             _bird = new root.Bird();
-            _toUpdate.push(_bird);
-            _toDraw.push(_bird);
+            addToUpdate(_bird);
+            addToDraw(_bird);
+            _bird.setPos({ x: 300, y: canvas.height });
+            _bird.yAccel = -4;
 
-            console.log('birdy bird', _bird);
+            console.log('Showing intro screen');
+            root.UI.showIntro();
+        };
 
-            _bird.setPos({ x: 300, y: 0 });
-
+        var start = function()
+        {
             console.log('Starting render loop!');
             _renderLoop();
         };
 
+        var end = function()
+        {
+            _ended = true;
+            root.UI.showEnd();
+        };
+
         return {
             init: init,
-            keyDown: keyDown,
-            keyUp: keyUp,
+            start: start,
+            end: end,
             getCanvasDimensions: getCanvasDimensions,
             removeFromDraw: removeFromDraw,
             removeFromUpdate: removeFromUpdate,
@@ -186,57 +216,40 @@
 
 })(window);
 
-// Keyboard input with customisable repeat (set to 0 for no key repeat)
-//
-function KeyboardController(keys, repeat)
-{
-    // Lookup of key codes to timer ID, or null for no repeat
-    //
-    var timers = {};
+var Key = {
+    _pressed: {},
+    _preserved: {},
 
-    // When key is pressed and we don't already think it's pressed, call the
-    // key action callback and set a timer to generate another one after a delay
-    //
-    document.onkeydown = function(event)
-    {
-        var key = (event || window.event).keyCode;
-        
-        if (!(key in keys))
+    SPACE: 32,
+    LEFT: 37,
+    UP: 38,
+    RIGHT: 39,
+    DOWN: 40,
+
+    isDown: function(keyCode) {
+        return this._pressed[keyCode];
+    },
+
+    isPreserved: function(keyCode) {
+        if ( typeof this._preserved[keyCode] !== 'undefined' ) {
+            delete this._preserved[keyCode];
             return true;
-
-        if (!(key in timers)) {
-            timers[key]= null;
-            keys[key]();
-            if (repeat !== 0)
-                timers[key] = setInterval(keys[key], repeat);
         }
+
         return false;
-    };
+    },
 
-    // Cancel timeout and mark key as released on keyup
-    //
-    document.onkeyup = function(event)
-    {
-        var key = (event || window.event).keyCode;
-        
-        if (key in timers) {
-            if (timers[key] !== null)
-                clearInterval(timers[key]);
-            delete timers[key];
-        }
-    };
+    onKeydown: function(event) {
+        this._pressed[event.keyCode] = true;
+    },
 
-    // When window is unfocused we may not get key events. To prevent this
-    // causing a key to 'get stuck down', cancel all held keys
-    //
-    window.onblur = function()
-    {
-        for (key in timers) {
-            if (timers[key] !== null) {
-                clearInterval(timers[key]);
-            }
+    onKeyup: function(event) {
+        // we always want to know if this was pressed, even if it is no longer pressed when we check
+        // we do this by adding it to a preserved list that is not cleared on keyup
+        if ( event.keyCode === Key.SPACE ) {
+            this._preserved[event.keyCode] = true;
         }
-        
-        timers = {};
-    };
-}
+
+        delete this._pressed[event.keyCode];
+    }
+};

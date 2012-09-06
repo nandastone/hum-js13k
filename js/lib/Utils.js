@@ -60,12 +60,18 @@
             return false;
         };
 
+        var sortByZIndex = function(a, b)
+        {
+            return (a.zIndex - b.zIndex);
+        };
+
 
         return {
             getRandomInt: getRandomInt,
             getRandomColour: getRandomColour,
             compareObjects: compareObjects,
-            removeFromArray: removeFromArray
+            removeFromArray: removeFromArray,
+            sortByZIndex: sortByZIndex
         };
 
     })();
