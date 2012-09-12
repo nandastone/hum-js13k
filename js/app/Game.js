@@ -10,14 +10,13 @@
 
         // game logic
         var _maxFlowers = 15,
-            _createNewFlowerTimer = null;
+            _createNewFlowerTimer = null,
+            _startTime = null;
 
         // game objects
         var _bird = null;
 
         // background visuals
-        var _backgroundGradient = null;
-        var _groundHeight = 35;
         var _sunGradient = null;
 
         var _useCanvas = function(id)
@@ -30,25 +29,23 @@
                 height : _canvas.height
             };
 
-            _backgroundGradient = canvas.context.createLinearGradient(canvas.width / 3, 0, canvas.width / 2, canvas.height);
-            _backgroundGradient.addColorStop(0, '#e99825');
-            _backgroundGradient.addColorStop(1, '#e92553');
-
-            _sunGradient = canvas.context.createRadialGradient(115, 100, 0, 105, 90, 100);
+            _sunGradient = canvas.context.createRadialGradient(140, 140, 0, 100, 100, 100);
             _sunGradient.addColorStop(0, 'rgba(240,217,19,1)');
-            _sunGradient.addColorStop(0.95, 'rgba(240,196,19,.9)');
+            _sunGradient.addColorStop(0.98, 'rgba(240,196,19,.9)');
             _sunGradient.addColorStop(1, 'rgba(240,196,19,0)');
-
-            console.log('Canvas setup:', canvas);
         };
 
-        var _renderLoop = function()
+        var _renderLoop = function(once)
         {
             if ( _ended ) return;
 
             // request a new frame
             requestAnimFrame(_renderLoop);
 
+            // if we only want to run the render loop once
+            if ( once === true ) _ended = true;
+
+            // logic to be calculated on every frame
             _logic();
 
             // render everything
@@ -76,8 +73,6 @@
 
                         addToUpdate(newFlower);
                         addToDraw(newFlower);
-
-                        console.log('Creating new flower', newFlower);
                     }
                 }, root.Utils.getRandomInt(200, 1000));
             }
@@ -100,19 +95,17 @@
             // clear screen
             root.Draw.clear();
 
-            // draw background
-            root.Draw.save();
-            canvas.context.fillStyle = _backgroundGradient;
-            canvas.context.fillRect(0, 0, canvas.width, canvas.height);
-            root.Draw.restore();
-
-            // draw the ground
-            root.Draw.drawRectangle('#999b0f', 0, canvas.height - _groundHeight, canvas.width, _groundHeight);
-
             // draw the sun
             root.Draw.save();
+            canvas.context.beginPath();
+            canvas.context.fillStyle = 'rgba(225,157,12,.5)';
+            canvas.context.arc(105, 105, 100, 0, Math.PI*2, true);
+            canvas.context.fill();
+            root.Draw.restore();
+
+            root.Draw.save();
             canvas.context.fillStyle = _sunGradient;
-            canvas.context.fillRect(5, -10, 200, 200);
+            canvas.context.fillRect(0, 0, 200, 200);
             root.Draw.restore();
 
             // draw everything else
@@ -164,39 +157,42 @@
             return { width: canvas.width, height: canvas.height };
         };
 
-        var init = function() {
-            console.log('Starting the game!');
-
-            console.log('Setting up the canvas!');
+        var init = function(justCanvas) {
             _useCanvas('stage');
-
-            console.log('Setting up the drawer!');
             root.Draw.setCanvas(canvas);
 
-            console.log('Binding events!');
             _bindEvents();
 
-            console.log('Creating the bird!');
             _bird = new root.Bird();
             addToUpdate(_bird);
             addToDraw(_bird);
+            // shoot the bird up into the air!
             _bird.setPos({ x: 300, y: canvas.height });
             _bird.yAccel = -4;
 
-            console.log('Showing intro screen');
             root.UI.showIntro();
         };
 
-        var start = function()
+        var start = function(once)
         {
-            console.log('Starting render loop!');
-            _renderLoop();
+            once = once || false;
+            _ended = false;
+
+            _renderLoop(once);
+
+            _startTime = new Date().getTime();
         };
 
         var end = function()
         {
+            var time = root.Utils.secondsToTime( ( new Date().getTime() - _startTime ) / 1000 );
+
             _ended = true;
-            root.UI.showEnd();
+
+            root.UI.showEnd({
+                time: time,
+                weight: _bird.weight
+            });
         };
 
         return {
@@ -205,10 +201,7 @@
             end: end,
             getCanvasDimensions: getCanvasDimensions,
             removeFromDraw: removeFromDraw,
-            removeFromUpdate: removeFromUpdate,
-
-            testUpdateList: _toUpdate,
-            testDrawList: _toDraw
+            removeFromUpdate: removeFromUpdate
         };
     })();
 

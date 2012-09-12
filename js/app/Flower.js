@@ -85,7 +85,19 @@
 
     Flower.prototype.draw = function()
     {
-        var originalLightness = this.hsl.lightness;
+        var ctx = root.Draw.getCanvas().context,
+            originalLightness = this.hsl.lightness;
+
+        // stalk mound
+        if ( !this.dying ) {
+            root.Draw.save();
+
+            ctx.beginPath();
+            ctx.fillStyle = '#999b0f';
+            ctx.arc(this.originatingX, root.Game.getCanvasDimensions().height + 2, this.width / 2, 0, Math.PI*2, true);
+            ctx.fill();
+            root.Draw.restore();
+        }
 
         // stalk
         // save before we set a stroke style for the stalk
@@ -108,11 +120,11 @@
             stalkY = this.finalY;
         }
 
-        var ctx = root.Draw.getCanvas().context;
         ctx.strokeStyle = 'rgba(' + this.stalkRGB.r + ', ' + this.stalkRGB.g + ', ' + this.stalkRGB.b +', ' + this.stalkOpacity + ')';
         ctx.lineWidth = this.stalkThickness;
         ctx.beginPath();
-        ctx.moveTo(this.originatingX, root.Game.getCanvasDimensions().height);
+        var stalkBottom = ( this.dying ) ? root.Game.getCanvasDimensions().height : ( ( root.Game.getCanvasDimensions().height - this.height / 2 ) + 3 );
+        ctx.moveTo(this.originatingX, stalkBottom );
         ctx.quadraticCurveTo(stalkX + this.stalkCurve.x, stalkY + this.stalkCurve.y, stalkX, stalkY);
         ctx.stroke();
 

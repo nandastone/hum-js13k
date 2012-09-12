@@ -8,11 +8,13 @@
 
         // flower logic
         //
-        this.width = this.originalWidth = 30;
-        this.height = this.originalHeight = 30;
-        this.sprite = document.getElementById('hum');
+        this.width = this.originalWidth = 80;
+        this.height = this.originalHeight = 80;
+        this.sprite = new Image();
+        this.sprite.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAABQCAMAAAAQlwhOAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDoyMEQ3NzYyRDk1RkNFMTExOTdCOUNCMjM5MkMwQ0Y3OCIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo1NzdFMDI4OUZDQTcxMUUxQTVEOUNFRkRCQUMwQTdCMCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo1NzdFMDI4OEZDQTcxMUUxQTVEOUNFRkRCQUMwQTdCMCIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1LjEgV2luZG93cyI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkJFOUE2RTQzOUJGQ0UxMTE5N0I5Q0IyMzkyQzBDRjc4IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjIwRDc3NjJEOTVGQ0UxMTE5N0I5Q0IyMzkyQzBDRjc4Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+Kc9JJwAAAB5QTFRFOzs7is0jQkJCALT/Pj4+MzMzc68VfLobgcAfAAAAJ8LRrQAAAAp0Uk5T////////////ALLMLM8AAADOSURBVHja7NbLDsIgFEXR+mrr//+wyWVCQkrBgUG69og08ciaVJf3xVqAgYGBgYGBgYGBgYGBgYGBgScF36I9ys+p/q8ZZw8YGBj4v8Fr9IjSx/PzetDZBVv2esD1PWBgYOAZwUvRK9qi/LW/ZVWmG/bSuY3dsgcMDAw8Lzgvv85e1P9n/1d7wMDAwFcCl539FNUvOMIeMDAw8Azg1DMqn3x7zRH2gIGBgecB36P6k55G2AMGBgaeBzxjwMDAwMDAwMDAwMDAwMDAF+gjwADrSXDr2PaazQAAAABJRU5ErkJggg==";
         this.frames = 3;
         this.curFrame = 0;
+        this.frameLimiter = 2; // new animation frame every 10 ticks
 
         // affects how fast the bird falls
         this.weight = 2;
@@ -31,8 +33,6 @@
         this.yAccel = 0.02;
         // the bird has a limit to it's upward movement
         this.maxYUpAccel = 2.5;
-        // currently no limit to downward movement
-        //this.maxYDownAccel = 4;
 
         // game logic
         this.flower = null;
@@ -56,11 +56,7 @@
 
     Bird.prototype.update = function()
     {
-        // clamp the downwards acceleration
-        /*if ( Math.abs(this.yAccel + this.weight) < this.maxYUpAccel ) {
-            this.yAccel += this.weight;
-        }*/
-
+        // figure out the new rate to fall at based on birdy weight
         this.yAccel += ( this.weight / 100 );
 
         var newX = this.x + this.xAccel,
@@ -95,10 +91,11 @@
 
     Bird.prototype.draw = function()
     {
-        root.Draw.drawImage(this.sprite, this.originalWidth * this.curFrame, 0, this.originalWidth, this.originalHeight, this.x, this.y, this.width, this.height);
+        var animFrame = Math.floor( this.curFrame / this.frameLimiter );
+        root.Draw.drawImage(this.sprite, this.originalWidth * animFrame, 0, this.originalWidth, this.originalHeight, this.x, this.y, this.width, this.height);
 
         this.curFrame++;
-        if ( this.curFrame > (this.frames - 1) ) {
+        if ( this.curFrame >= (this.frames * this.frameLimiter) ) {
             this.curFrame = 0;
         }
 
@@ -107,11 +104,8 @@
             root.Draw.save();
 
             var ctx = root.Draw.getCanvas().context;
-            ctx.strokeStyle = "#da0aa2";
-            ctx.beginPath();
-            ctx.moveTo(this.x, this.y + 16);
-            ctx.lineTo(this.x - 2, this.y + 19);
-            ctx.stroke();
+            ctx.fillStyle = "#e61752";
+            ctx.fillRect(this.x + 4, this.y + 32, 6, 6);
 
             root.Draw.restore();
         }
@@ -124,7 +118,7 @@
             currentFlower = null;
 
         for (var i = 0, l = flowers.length; i < l; i++) {
-            var pos = { x: this.x, y: this.y + 15 }; // adjust the suckle point
+            var pos = { x: this.x + 10, y: this.y + 32 }; // adjust the suckle point
 
             if (flowers[i].isNear(pos)) {
                 currentFlower = flowers[i];
@@ -162,7 +156,7 @@
 
         // more lift the lower you are down the screen
         // less lift the less energy you have
-        var newYAccel = this.yAccel - ( ( this.lift - ( 100 - this.energy ) / 1000 ) + ( this.y * 0.001) );
+        var newYAccel = this.yAccel - ( ( this.lift - ( 100 - this.energy ) / 600 ) + ( this.y * 0.001) );
 
         // hard coded little "jump" of lift
         this.y -= ( this.lift * 5 );

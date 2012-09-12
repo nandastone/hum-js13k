@@ -2,59 +2,166 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-
     <title>Hum</title>
-    <meta name="description" content="">
-
-    <meta name="viewport" content="width=device-width">
-
+    
     <style>
         * { font-family: "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif; padding: 0; margin: 0; }
-        #wrapper { position: relative; width: 640px; height: 480px; }
+        html, body { height: 100%; }
+        body { overflow: hidden; }
 
-        #intro, #end { display: none; position: absolute; top: 0; left: 0; width: 640px; height: 480px; background: #fc6; }
-        #end { background: #63c; }
+        .background { position: absolute; left: 0; width: 100%; height: 50%; }
+        .background.top { top: 0; background: #e99825; }
+        .background.bottom { bottom: 0; background: #999b0f; }
 
-        #hum { display: none; }
-        #energy, #remaining { display: none; position: absolute; top: 6px; right: 6px; width: 150px; height: 22px; background: #f00; }
+        #outer-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 480px;
+            margin-top: -240px;
+
+            background-color: #e99825;
+            background-image: -webkit-linear-gradient(top, #e99825, #e92553); /* Chrome 10+, Safari 5.1+, iOS 5+ */
+            background-image:         liear-gradient(to bottom, #e99825, #e92553); /* Firefox 16+, IE10, Opera 12.50+ */
+        }
+        #inner-wrapper { position: absolute; top: 0; left: 50%; width: 640px; height: 100%; margin-left: -320px; }
+
+        #intro, #end { display: none; position: absolute; top: 70px; left: 50px; width: 500px; height: 300px; background: #fc6; color: #331308; padding: 20px 25px; }
+            h1 { margin-bottom: .5em; }
+            p, dl { margin-bottom: 1em; }
+            p { line-height: 1.3em; }
+            button { clear: both; display: block; background: #f5bf53; border: 1px outset #e9b03f; padding: 6px 12px; cursor: pointer; }
+            button:active { border-style: inset; }
+            dl { overflow: hidden; }
+                dt { clear: both; float: left; width: 220px; margin-bottom: 5px; }
+                dd { float: left; color: #6b4e16; }
+            span.key { display: inline-block; background: #feda92; padding: 0 4px; border: 1px outset #fc6; }
+
+        #energy, #remaining { z-index: 5000; display: none; position: absolute; top: 6px; right: 6px; width: 150px; height: 22px; background: #fff; }
             #remaining { display: block; top: 0; left: 0; background: #fc0; }
-        #weighty { display: none; position: absolute; z-index: 500; top: 32px; right: 6px; color: #fff600; font-size: 13px; }
+        #weighty { z-index: 5000; display: none; position: absolute; z-index: 500; top: 32px; right: 6px; color: #fff600; font-size: 13px; }
+
+        .cloud {
+            z-index: 100;
+            width: 200px; height: 60px;
+            background: #f7eaab;
+
+            border-radius: 200px;
+            -moz-border-radius: 200px;
+            -webkit-border-radius: 200px;
+
+            position: absolute;
+
+            -webkit-animation: moveclouds 120s linear infinite;
+            -moz-animation: moveclouds 120s linear infinite;
+        }
+
+        .cloud:before, .cloud:after {
+            content: '';
+            position: absolute; 
+            background: #f7eaab;
+            width: 100px; height: 80px;
+            position: absolute; top: -15px; left: 10px;
+
+            border-radius: 100px;
+            -moz-border-radius: 100px;
+            -webkit-border-radius: 100px;
+
+            -webkit-transform: rotate(30deg);
+            transform: rotate(30deg);
+            -moz-transform: rotate(30deg);
+        }
+
+        .cloud:after {
+            width: 120px; height: 120px;
+            top: -55px; left: auto; right: 15px;
+        }
+
+        .x1 {
+            top: 12%; left: 20%;
+        }
+        .x2 {
+            top: 15%; left: 50%;
+            -webkit-transform: scale(0.6);
+            -moz-transform: scale(0.6);
+            transform: scale(0.6);
+            opacity: 0.6;
+        }
+        .x3 {
+            top: 8%; left: 80%;
+            -webkit-transform: scale(0.8);
+            -moz-transform: scale(0.8);
+            transform: scale(0.8);
+            opacity: 0.8;
+        }
+        .x4 {
+            top: 15%; left: 25%;
+            -webkit-transform: scale(0.7);
+            -moz-transform: scale(0.7);
+            transform: scale(0.7);
+            opacity: 0.8;
+        }
+        .x5 {
+            top: 2%; left: -3%;
+            -webkit-transform: scale(0.7);
+            -moz-transform: scale(0.7);
+            transform: scale(0.7);
+            opacity: 0.7;
+        }
+
+        @-webkit-keyframes moveclouds {
+            0% {margin-left: 1000px;}
+            100% {margin-left: -1000px;}
+        }
+        @-moz-keyframes moveclouds {
+            0% {margin-left: 1000px;}
+            100% {margin-left: -1000px;}
+        }
     </style>
 </head>
 
 <body>
 
-<div id="wrapper">
+<div class="background top"></div>
+<div class="background bottom"></div>
+
+<div class="cloud x1"></div>
+<div class="cloud x2"></div>
+<div class="cloud x3"></div>
+<div class="cloud x4"></div>
+<div class="cloud x5"></div>
+
+<p id="weighty"><span id="weight"></span> lbs</p>
+<div id="energy"><span id="remaining"></span></div>
+
+<div id="outer-wrapper">
+<div id="inner-wrapper">
     <canvas id="stage" width="640" height="480"></canvas>
 
-    <img id="hum" src="/img/hum.png">
-
-    <p id="weighty"><span id="weight"></span> lbs</p>
-    <div id="energy"><span id="remaining"></span></div>
-
     <div id="intro">
-        <h2>Hum</h2>
-        <p>Roger is a very hungry hummingbird. Drink as many flowers as you can before Roger runs out of energy.</p>
-        <p><small>Use the space bar to flap Roger's tiny wings. Use the &larr; &amp; &rarr; keys to navigate.</small></p>
+        <h1>Hum</h1>
+        <p>Roger is a very hungry hummingbird. He needs nectar, pronto. He launches into the air on his tiny wings, sipping from flower to flower.</p>
+        <p><small>Roger must flap his wings quickly with the <span class="key">space</span> bar. Use the <span class="key">&larr;</span> &amp; <span class="key">&rarr;</span> keys to move Roger. Position his beak right in the middle of a flower, where the nectar is plentiful.</small></p>
         <button id="begin">Begin</button>
     </div>
 
     <div id="end">
-        <h2>Oh no!</h2>
-        <p>Roger just couldn't flap anymore.</p>
+        <h1>Hum</h1>
+        <p>Poor Roger. He just couldn't flap any longer.</p>
         <dl>
             <dt>Time aloft</dt>
-            <dd>1:34</dd>
+            <dd id="end-time">1:34</dd>
 
             <dt>Roger's weight</dt>
-            <dd>3.567 pounds</dd>
+            <dd id="end-weight">3.56 pounds</dd>
 
             <dt>Roger's favourite flower</dt>
-            <dd>Blue</dd>
+            <dd id="end-color">Blue</dd>
         </dl>
         <button id="again">Play Again</button>
     </div>
+</div>
 </div>
 
 <!-- vendor -->
@@ -72,6 +179,7 @@
 
 <script>
     Game.init();
+    Game.start(true);
 </script>
 
 </body>
