@@ -1,6 +1,8 @@
 Hum
 ====
-My entry into the js13kGames (http://js13kgames.com) competition. Play Roger the hummingbird in his quest for nectar.
+My entry into the js13kGames (http://js13kgames.com) competition. 
+
+Play Roger the hummingbird in his quest for delicious nectar!
 
 Credits
 ----
