@@ -4,6 +4,6 @@ My entry into the js13kGames (http://js13kgames.com) competition. Play Roger the
 
 Credits
 ----
-Matt Stone (matt@hollersydney.com.au)
-Thomas Fitzpatrick (thomas.fitzpatrick@hollersydney.com.au)
-Vani!
+* Matt Stone (matt@hollersydney.com.au)
+* Thomas Fitzpatrick (thomas.fitzpatrick@hollersydney.com.au)
+* Vani!
