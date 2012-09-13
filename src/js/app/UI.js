@@ -5,7 +5,6 @@
 		var $$ = function(id) { return document.getElementById(id); },
 			$intro = $$('intro'),
 			$weight = $$('weight'),
-			$weighty = $$('weighty'),
 			$energy = $$('energy');
 
 		var favColours = ['Blue', 'Red', 'Pink', 'Yellow', 'Orange', 'Teal', 'Magenta', 'Gold', 'Cyan'];
@@ -27,7 +26,7 @@
 				// slight delay as a visual effect
 				setTimeout(function() {
 					_hideEl($intro);
-					_showEl($weighty);
+					_showEl($weight);
 					_showEl($energy);
 					root.Game.start(false);
 				}, 100);
@@ -36,15 +35,16 @@
 
 		var showEnd = function(settings)
 		{
-			_hideEl($weighty);
+			_hideEl($weight);
 			_hideEl($energy);
 
 			// set the end game screen properties
 			var color = favColours[root.Utils.getRandomInt(0, ( favColours.length - 1 ))],
-				$endColor = $$('end-color');
+				$endColor = $$('end-color'),
+				endWeight = Math.floor(settings.weight * 5);
 
 			$$('end-time').innerHTML = settings.time.m + ':' + settings.time.s;
-			$$('end-weight').innerHTML = settings.weight.toFixed(2) + ' pounds';
+			$$('end-weight').innerHTML = endWeight + ' grams';
 			$endColor.innerHTML = color;
 			$endColor.style.color = color;
 
@@ -54,7 +54,10 @@
 
 		var displayWeight = function(weight)
 		{
-			$weight.innerHTML = weight.toFixed(1);
+			var width = Math.ceil( weight * 25 );
+			$weight.style.width = width + 'px';
+
+			console.log('new weight', weight, width);
 		};
 
 		var displayEnergy = function(energy)
